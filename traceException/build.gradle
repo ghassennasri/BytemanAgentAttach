@@ -1,0 +1,15 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+dependencies{
+     // https://mvnrepository.com/artifact/org.jboss.byteman/byteman
+    implementation group: 'org.jboss.byteman', name: 'byteman', version: '4.0.20'
+}
