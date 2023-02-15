@@ -1,4 +1,4 @@
-# ReadMe
+# Description
 
 The provided shell script is a generic script that can be used to attach a Byteman agent to any running Java process. Once attached, it can run any Byteman rule that has been created to modify the bytecode of a specific class or method.
 
