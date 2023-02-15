@@ -1,0 +1,21 @@
+#https://github.com/a0x8o/kafka/blob/master/clients/src/main/java/org/apache/kafka/clients/FetchSessionHandler.java L602
+
+RULE kafka-fetch-session-handle-error
+CLASS org.apache.kafka.clients.FetchSessionHandler
+METHOD handleError(java.lang.Throwable)
+HELPER io.confluent.examples.KafkaFetchSessionHandleErrorHelper
+AT EXIT
+IF $1 instanceof org.apache.kafka.common.errors.DisconnectException
+DO traceStack($1);
+ENDRULE
+
+
+RULE test-with-sample-Application
+CLASS JavaTestApplication
+METHOD handleException(java.lang.Throwable)
+HELPER io.confluent.examples.KafkaFetchSessionHandleErrorHelper
+AT EXIT
+IF $1 instanceof RuntimeException
+DO traceStack($1);
+ENDRULE
+

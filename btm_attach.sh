@@ -9,20 +9,27 @@ if [ $# -lt 2 ]; then
 fi
 
 # Check if BYTEMAN_HOME is set and not empty
-if [ -z "$3" ]; then
+if [ -z "$3" ] && [ ! -d $(pwd)/byteman-download-4.0.20 ]; then
     echo "BYTEMAN_HOME is not set."
     read -p "Do you want to download and install Byteman now? (y/n) " choice
     if [[ "$choice" =~ ^[Yy]$ ]]; then
         # Download and install Byteman
         echo "Downloading Byteman..."
         wget https://downloads.jboss.org/byteman/4.0.20/byteman-download-4.0.20-bin.zip
-        unzip byteman-download-4.0.20.zip
+        unzip -qq byteman-download-4.0.20-bin.zip || {
+           echo "Unzip failed"
+           exit 1
+           }
         export BYTEMAN_HOME=$(pwd)/byteman-download-4.0.20
         echo "BYTEMAN_HOME is set to $BYTEMAN_HOME"
     else
         echo "Exiting script."
         exit 1
     fi
+elif 
+ [  -d $(pwd)/byteman-download-4.0.20 ]; then
+  export BYTEMAN_HOME=$(pwd)/byteman-download-4.0.20
+  echo "BYTEMAN_HOME is set to $BYTEMAN_HOME"
 else
  # Set the path to the Byteman agent jar file
  BYTEMAN_HOME=$3
@@ -49,8 +56,9 @@ echo "Building Rule helper class..."
 #copy help Rule class jar to local dir
 echo "Copying helper class jar to current dir..."
 cp ${PWD}/build/libs/stackTraceBmHelper-1.0-SNAPSHOT.jar  stackTraceBmHelper-1.0-SNAPSHOT.jar
+#change directory permission
+chmod -R 777 .
 # Install the Byteman agent into the Java process
-#$BYTEMAN_HOME/bin/bminstall.sh $PID
 echo "Installing Byteman agent into the java process with $PID..."
 java -cp "$BYTEMAN_HOME/lib/byteman-install.jar:$JAVA_HOME/lib/tools.jar:${PWD}/build/libs/stackTraceBmHelper-1.0-SNAPSHOT.jar" \
   org.jboss.byteman.agent.install.Install $PID

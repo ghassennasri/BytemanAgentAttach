@@ -69,8 +69,15 @@ To use this code to attach Byteman to a Kafka Streams application and run one or
 4. Run the `btm_attach.sh` script **as root** to attach the Byteman agent to your application and run the rules in `RULE_FILE`.
 5. Verify that the rules are being executed and that the expected log output is being produced in `/tmp/traceException.txt`
 
-Example : 
+Example (using the javaTestApplication): 
+
+1. Navigate to `javaApplicationExample` directory and run 
+```shell
+./gradlew run
+
+```
+2. Open another shell terminal, navigate to the project root directory and run
 
 ```shell
-sudo ./traceException.sh $(jps | grep TestLog4j | awk '{ print $1 }') ./traceDisconnect.btm  $BYTEMAN_HOME
+sudo ./btm_attach.sh $(jps | grep JavaTestApplication | awk '{ print $1 }') ./traceDisconnect.btm  $BYTEMAN_HOME
 ```

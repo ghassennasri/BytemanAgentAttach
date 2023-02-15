@@ -20,7 +20,7 @@ public class JavaTestApplication {
         throw new RuntimeException("An error occurred");
     }
     public static void handleException(Throwable t) {
-        log.info("an exception occured in class= {} , from  {}:\n {}.", TestLog4j.class.getSimpleName(),new Throwable().getStackTrace()[1].getMethodName() , t);
+        log.info("an exception occured in class= {} , from  {}:\n {}.", JavaTestApplication.class.getSimpleName(),new Throwable().getStackTrace()[1].getMethodName() , t);
 
     }
 }
