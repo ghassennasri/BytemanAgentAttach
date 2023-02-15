@@ -79,5 +79,5 @@ Example (using the javaTestApplication):
 2. Open another shell terminal, navigate to the project root directory and run
 
 ```shell
-sudo ./btm_attach.sh $(jps | grep JavaTestApplication | awk '{ print $1 }') ./traceDisconnect.btm  $BYTEMAN_HOME
+sudo ./btm_attach.sh $(jps | grep JavaTestApplication | awk '{ print $1 }') ./traceDisconnect.btm
 ```
