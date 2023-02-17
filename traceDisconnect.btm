@@ -19,3 +19,67 @@ IF $1 instanceof RuntimeException
 DO traceStack($1);
 ENDRULE
 
+RULE print-stack-trace-on-exception
+CLASS org.apache.kafka.clients.consumer.internals.ConsumerNetworkClient$RequestFutureCompletionHandler
+METHOD fireCompletion()
+AT ENTRY
+BIND ex:RuntimeException = $0.e;
+IF ex != null
+DO traceOpen("log","/tmp/traceException.txt");
+
+   traceln("log", "*****************print-stack-trace-on-exception fired *********************************** ");
+   traceln("Exception stack trace:");
+   ex.printStackTrace();
+   traceStack(ex);
+   traceln("log", "*****************print-stack-trace-on-exception END *********************************** ");
+   traceClose("log");
+ENDRULE
+
+RULE print-on-Disconnect-Response
+CLASS org.apache.kafka.clients.consumer.internals.ConsumerNetworkClient$RequestFutureCompletionHandler
+METHOD fireCompletion()
+AT ENTRY
+BIND r:org.apache.kafka.clients.ClientResponse = $this.response;
+IF $this.e==null AND r.wasDisconnected()
+
+DO traceOpen("log","/tmp/traceException.txt");
+
+   traceln("log", "*****************Byteman rule print-on-Disconnect-Response fired *********************************** ");
+   traceln("log",r.toString());
+   System.out.println("[BYTEMAN] Calling"+r.toString());
+   traceln("log", "*****************Byteman rule print-on-Disconnect-Response END *********************************** ");
+   traceClose("log");
+ENDRULE
+
+RULE print-on-Disconnect-response-create
+CLASS  org.apache.kafka.clients.ClientResponse
+METHOD <init>(org.apache.kafka.common.requests.RequestHeader, org.apache.kafka.clients.RequestCompletionHandler, String, long, long, boolean, org.apache.kafka.common.errors.UnsupportedVersionException, org.apache.kafka.common.errors.AuthenticationException, org.apache.kafka.common.requests.AbstractResponse)
+AT ENTRY
+IF $6
+
+DO traceOpen("log","/tmp/traceException.txt");
+   traceln("log", "################Byteman rule print-on-Disconnect-response-create fired ####################################### ");
+   traceln("log", "Caller stack : ");
+   traceln("log",formatStack());
+   traceln("log", "*****************Byteman rule print-on-Disconnect-response-create END *********************************** ");
+   traceClose("log");
+   #System.out.println("[BYTEMAN] Calling"+r.toString());
+ENDRULE
+
+
+RULE print-on-Channel-Close
+CLASS  org.apache.kafka.common.network.Selector
+METHOD doClose( org.apache.kafka.common.network.KafkaChannel, boolean)
+AT ENTRY
+
+IF TRUE
+
+DO traceOpen("log","/tmp/traceException.txt");
+
+   traceln("log", "$$$$$$$$$$$$$$$$$$$$$$$Byteman rule print-on-Channel-Close fired $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
+   traceln("log","--------------------stack trace channel close----------------------------");
+   traceln("log",formatStack());
+   traceln("log", "$$$$$$$$$$$$$$$$$$$$$$$Byteman rule print-on-Channel-Close END $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
+   traceClose("log");
+ENDRULE
+
