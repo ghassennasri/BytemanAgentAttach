@@ -56,7 +56,11 @@ Two example Byteman rules are provided in the rule file `traceDisconnect.btm` di
 
 - `kafka-fetch-session-handle-error`: a rule that adds a log statement to the `handleError` method of the `FetchSessionHandler` class in the Kafka client library. The log statement includes the current time, the message "Error sending fetch request", and the stack trace of the `Throwable` parameter.
 - `test-with-sample-Application`: a rule that adds a log statement to the `handleException` method of a test class. The log statement includes the current time, the message "an exception occurred", and the stack trace of the `Throwable` parameter.
-
+- `print-on-Channel-Close` : Trace kafka channel close call 
+- ` print-on-Disconnect-response-create` : A rule to trace the creation of ClientResponse when there is a disconnection
+- `print-stack-trace-on-exception` : A rule to dump stacktrace of the RuntimeException from org.apache.kafka.clients.consumer.internals.
+ConsumerNetworkClient$RequestFutureCompletionHandler when disconnection occurs.
+- `print-on-Disconnect-Response` : A rule to get a toString() of ClientResponse when when disconnection occurs.
 To run these rules, simply specify the path to the rule file as the `RULE_FILE` argument when running the `run_byteman.sh` script.
 
 ## Usage
@@ -79,5 +83,6 @@ Example (using the javaTestApplication):
 2. Open another shell terminal, navigate to the project root directory and run
 
 ```shell
-sudo ./btm_attach.sh $(jps | grep JavaTestApplication | awk '{ print $1 }') ./traceDisconnect.btm
+#Syntax : ./btm_attach.sh [-t time_limit default 5min] [-b BYTEMAN_HOME]  PID RULE_FILE 
+sudo ./btm_attach.sh -t 5 $(jps | grep JavaTestApplication | awk '{ print $1 }') ./traceDisconnect.btm
 ```
