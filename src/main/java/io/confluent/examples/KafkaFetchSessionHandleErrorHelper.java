@@ -16,7 +16,8 @@ public class KafkaFetchSessionHandleErrorHelper extends org.jboss.byteman.rule.h
     }
 
     public void traceStack(Throwable t) throws IOException {
-        File file = new File("/tmp/traceException.txt");
+        String threadName=Thread.currentThread().getName();
+        File file = new File("/tmp/traceException-"+threadName+".txt");
         PrintWriter writer = new PrintWriter(new FileWriter(file, true));
         //get timestamp
         LocalDateTime now = LocalDateTime.now();

@@ -15,8 +15,12 @@ CLASS JavaTestApplication
 METHOD handleException(java.lang.Throwable)
 HELPER io.confluent.examples.KafkaFetchSessionHandleErrorHelper
 AT EXIT
+BIND threadName:String=Thread.currentThread().getName();
 IF $1 instanceof RuntimeException
-DO traceStack($1);
+DO traceOpen("log"+threadName,"/tmp/traceException-"+threadName+".txt");
+   traceln("log"+threadName,"Exception stack trace:");
+   traceStack($1);
+   traceClose("log"+threadName);
 ENDRULE
 
 RULE print-stack-trace-on-exception
@@ -24,15 +28,16 @@ CLASS org.apache.kafka.clients.consumer.internals.ConsumerNetworkClient$RequestF
 METHOD fireCompletion()
 AT ENTRY
 BIND ex:RuntimeException = $0.e;
+     threadName:String=Thread.currentThread().getName();
 IF ex != null
-DO traceOpen("log","/tmp/traceException.txt");
+DO traceOpen(threadName,"/tmp/traceException-"+threadName+".txt");
 
-   traceln("log", "*****************print-stack-trace-on-exception fired *********************************** ");
+   traceln(threadName+, "*****************print-stack-trace-on-exception fired *********************************** ");
    traceln("Exception stack trace:");
    ex.printStackTrace();
    traceStack(ex);
-   traceln("log", "*****************print-stack-trace-on-exception END *********************************** ");
-   traceClose("log");
+   traceln(threadName, "*****************print-stack-trace-on-exception END *********************************** ");
+   traceClose(threadName);
 ENDRULE
 
 RULE print-on-Disconnect-Response
@@ -40,29 +45,31 @@ CLASS org.apache.kafka.clients.consumer.internals.ConsumerNetworkClient$RequestF
 METHOD fireCompletion()
 AT ENTRY
 BIND r:org.apache.kafka.clients.ClientResponse = $this.response;
+     threadName:String=Thread.currentThread().getName();
 IF $this.e==null AND r.wasDisconnected()
 
-DO traceOpen("log","/tmp/traceException.txt");
+DO traceOpen(threadName,"/tmp/traceException-"+threadName+".txt");
 
-   traceln("log", "*****************Byteman rule print-on-Disconnect-Response fired *********************************** ");
-   traceln("log",r.toString());
+   traceln(threadName, "*****************Byteman rule print-on-Disconnect-Response fired *********************************** ");
+   traceln(threadName,r.toString());
    System.out.println("[BYTEMAN] Calling"+r.toString());
-   traceln("log", "*****************Byteman rule print-on-Disconnect-Response END *********************************** ");
-   traceClose("log");
+   traceln(threadName, "*****************Byteman rule print-on-Disconnect-Response END *********************************** ");
+   traceClose(threadName);
 ENDRULE
 
 RULE print-on-Disconnect-response-create
 CLASS  org.apache.kafka.clients.ClientResponse
 METHOD <init>(org.apache.kafka.common.requests.RequestHeader, org.apache.kafka.clients.RequestCompletionHandler, String, long, long, boolean, org.apache.kafka.common.errors.UnsupportedVersionException, org.apache.kafka.common.errors.AuthenticationException, org.apache.kafka.common.requests.AbstractResponse)
 AT ENTRY
+BIND threadName:String=Thread.currentThread().getName();
 IF $6
 
-DO traceOpen("log","/tmp/traceException.txt");
-   traceln("log", "################Byteman rule print-on-Disconnect-response-create fired ####################################### ");
-   traceln("log", "Caller stack : ");
-   traceln("log",formatStack());
-   traceln("log", "*****************Byteman rule print-on-Disconnect-response-create END *********************************** ");
-   traceClose("log");
+DO traceOpen(threadName,"/tmp/traceException-"+threadName+".txt");
+   traceln(threadName, "################Byteman rule print-on-Disconnect-response-create fired ####################################### ");
+   traceln(threadName, "Caller stack : ");
+   traceln(threadName,formatStack());
+   traceln(threadName, "*****************Byteman rule print-on-Disconnect-response-create END *********************************** ");
+   traceClose(threadName);
    #System.out.println("[BYTEMAN] Calling"+r.toString());
 ENDRULE
 
@@ -71,15 +78,15 @@ RULE print-on-Channel-Close
 CLASS  org.apache.kafka.common.network.Selector
 METHOD doClose( org.apache.kafka.common.network.KafkaChannel, boolean)
 AT ENTRY
-
+BIND threadName:String=Thread.currentThread().getName();
 IF TRUE
 
-DO traceOpen("log","/tmp/traceException.txt");
+DO traceOpen(threadName,"/tmp/traceException-"+threadName+".txt");
 
-   traceln("log", "$$$$$$$$$$$$$$$$$$$$$$$Byteman rule print-on-Channel-Close fired $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
-   traceln("log","--------------------stack trace channel close----------------------------");
-   traceln("log",formatStack());
-   traceln("log", "$$$$$$$$$$$$$$$$$$$$$$$Byteman rule print-on-Channel-Close END $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
-   traceClose("log");
+   traceln(threadName, "$$$$$$$$$$$$$$$$$$$$$$$Byteman rule print-on-Channel-Close fired $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
+   traceln(threadName,"--------------------stack trace channel close----------------------------");
+   traceln(threadName,formatStack());
+   traceln(threadName, "$$$$$$$$$$$$$$$$$$$$$$$Byteman rule print-on-Channel-Close END $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ ");
+   traceClose(threadName);
 ENDRULE
 
