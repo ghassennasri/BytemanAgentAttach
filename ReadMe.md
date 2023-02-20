@@ -71,7 +71,7 @@ To use this code to attach Byteman to a Kafka Streams application and run one or
 2. Clone this repository and navigate to the root directory.
 3. Create your rule file to create your custom rules or use the provided one. Set new variables for `RULE_FILE`  and `PID`  (linux pid of the application you would like to attach to), and optionally set the `BYTEMAN_HOME` environment variable.
 4. Run the `btm_attach.sh` script **as root** to attach the Byteman agent to your application and run the rules in `RULE_FILE`.
-5. Verify that the rules are being executed and that the expected log output is being produced in `/tmp/traceException.txt`
+5. Verify that the rules are being executed and that the expected log output is being produced in `/tmp/traceException-(JavaThreadName).txt`
 
 Example (using the javaTestApplication): 
 
@@ -85,4 +85,28 @@ Example (using the javaTestApplication):
 ```shell
 #Syntax : ./btm_attach.sh [-t time_limit default 5min] [-b BYTEMAN_HOME]  PID RULE_FILE 
 sudo ./btm_attach.sh -t 5 $(jps | grep JavaTestApplication | awk '{ print $1 }') ./traceDisconnect.btm
+```
+
+Example (using the ConsumerPlayground): 
+1. Navigate to Kafka-consumer-repro-examples directory and run 
+```shell
+./do_provision [aws_key] [aws_secret_key] [aws_regin_name] [aws_ec2-key_name]
+
+```
+You will be prompted to enter the following:
+- the number of consumer threads (default 1)
+- the value of request.timeout.ms (default 30s)
+- the value of connections.max.idle.timeout.ms (default 5min)
+
+To reproduce the "org.apache.kafka.common.errors.DisconnectException:null" exception either enter;
+- A very small value for request.timeout.ms (10ms for example)
+- A  very small value for connections.max.idle.timeout.ms (10ms for example)
+- A very high number of consumer threads (1000 for example)
+
+After few seconds, on the console, you will start to notice messages tracking the number of "org.apache.kafka.common.errors.DisconnectException:null";
+`Found [n] occurrences of org.apache.kafka.common.errors.DisconnectException:null, still searching..`
+
+2. Open another shell terminal, navigate to the project root directory and run;
+```shell
+sudo ./btm_attach.sh -t 10 $(jps | grep kafkaConsumerReproExamples-1.0-SNAPSHOT-all.jar | awk '{ print $1 }') ./traceDisconnect.btm
 ```
